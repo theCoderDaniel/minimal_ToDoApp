@@ -1,0 +1,22 @@
+{
+  "name": "To-Do App",
+  "short_name": "To-Do",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6faff",
+  "theme_color": "#665cff",
+  "orientation": "portrait",
+  "description": "Einfache To-Do Liste als PWA",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <title>To-Do</title>
+
+  <!-- PWA Manifest + Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#665cff">
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="To-Do">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Manrope:wght@700;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #665cff;
+      --soft: #bdbcf6;
+      --radius: 22px;
+      --bg: #f6faff;
+      --card: #fff;
+    }
+    html,body {margin:0; padding:0; background:var(--bg); font-family:'Manrope',Arial,sans-serif;}
+    body,.container {min-height:100vh;}
+    .container {max-width:410px;margin:0 auto;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:flex-start;}
+    h1 {
+      margin:44px 0 18px 0; text-align:center;
+      color: var(--primary);
+      font-weight: 800;
+      font-size:1.25rem;
+      letter-spacing:-.8px;
+    }
+    .todo-box {
+      width: 97vw; max-width:365px; margin:0 auto;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 30px #b1b2ca22;
+      padding: 34px 16px 18px 16px;
+      display: flex; flex-direction: column; gap:17px;
+    }
+    .todo-form {
+      display:flex;
+      gap:8px;
+      background: #f7f8fe;
+      border-radius:19px;
+      padding: 5px 7px 5px 10px;
+      align-items: center;
+      box-shadow:0 2px 12px #c7befd14 inset;
+      border:1.2px solid #e1dffe;
+    }
+    .todo-form input {
+      flex:1 1 auto;
+      font-size:1.08em;
+      background:none;
+      border:none;
+      outline:none;
+      padding: 12px 4px 12px 7px;
+      border-radius:14px;
+      color:#222;
+      font-family: inherit;
+    }
+    .todo-form input::placeholder {color:#abbacd;}
+    .todo-form button {
+      background:var(--primary);
+      color:#fff;
+      border: none;
+      border-radius: 15px;
+      font-size:1.35em;
+      font-weight: 800;
+      width:40px; height:40px;
+      min-width:40px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:background .14s;
+      box-shadow:0 1px 4px #b7bafb12;
+      outline: none;
+    }
+    .todo-form button:active {background:#4931f4;}
+    .todos-list {
+      margin:0;padding:0;display:flex;flex-direction:column;gap:13px;
+      width:100%;
+    }
+    .todo-card {
+      background:#f7f8fe;
+      border-radius:16px;
+      box-shadow:0 1.5px 11px #bbb9f10d;
+      padding: 17px 15px 15px 17px;
+      display:flex; align-items:center; gap:10px;
+      font-size:1.09em;
+      font-weight:700;
+      color:#1a1a1a;
+      position:relative;
+      transition: box-shadow .12s;
+    }
+    .todo-card.done {
+      color: #b5bad4;
+      text-decoration: line-through;
+      font-weight: 500;
+      opacity: .68;
+    }
+    .todo-close {
+      background:none; border:none;
+      color: #c4befa;
+      border-radius:13px;
+      font-size:1.16em;
+      width:33px;height:33px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition: color .12s, background .12s;
+      margin-left:auto;
+    }
+    .todo-close:active, .todo-close:hover { color:#ef5350; background:#fbe6e3;}
+    .todo-check {
+      margin-right:9px;margin-left:-3px;
+      appearance: none;
+      width:22px;height:22px;
+      border-radius:50%;
+      border:2px solid var(--primary);
+      background:#f7f8fe;
+      cursor:pointer;
+      position:relative;
+      transition: border .14s, background .14s;
+      flex-shrink:0;
+    }
+    .todo-check:checked {background:var(--primary);}
+    .todo-check:checked:after {
+      content:'';
+      width:10px; height:10px;
+      display:block;
+      background:#fff;
+      border-radius:50%;
+      position:absolute;top:4.5px;left:4.5px;
+    }
+    .empty {
+      text-align:center;
+      color:#bfc7d8;
+      font-size:1.06em;
+      font-weight:600;
+      margin-top:13px;margin-bottom:4px;
+    }
+    .todo-label {
+      flex:1;
+      display:block;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      cursor:pointer;
+      padding: 0 6px;
+    }
+    @media (max-width:430px){
+      .todo-box{max-width:98vw;}
+    }
+    /* Modal for details */
+    .todo-detail-modal {
+      position:fixed;top:0;left:0;width:100vw;height:100vh;
+      background:#0007;display:flex;align-items:center;justify-content:center;z-index:5555;
+    }
+    .todo-detail-modal-inner {
+      background:white;padding:22px 18px 15px 18px;
+      border-radius:18px;max-width:85vw;box-shadow:0 3px 44px #3334;
+      font-size:1.13em;letter-spacing:-.4px;word-break:break-word;text-align:left;max-height:60vh;overflow:auto;
+      min-width:140px;
+    }
+    .todo-detail-modal-inner button {
+      margin:0 auto;display:block;border-radius:10px;background:#665cff;color:white;
+      border:none;padding:7px 24px;font-size:1em;font-weight:bold;box-shadow:0 1px 6px #0001;
+      cursor:pointer;margin-top:12px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>To-Do</h1>
+  <div class="todo-box">
+    <form class="todo-form" id="todoForm" autocomplete="off">
+      <input type="text" id="todoInput" placeholder="Neues To-Do..." maxlength="45" required>
+      <button type="submit" title="Hinzufügen">+</button>
+    </form>
+    <div class="todos-list" id="todos"></div>
+  </div>
+</div>
+<script>
+const STORAGE_KEY = "todos1";
+function getTodos() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+function saveTodos(todos){ localStorage.setItem(STORAGE_KEY,JSON.stringify(todos)); }
+function truncateText(str, n) {
+  if(str.length <= n) return str.replace(/</g,"&lt;");
+  return str.slice(0,n-1).replace(/</g,"&lt;") + '…';
+}
+function showDetails(text) {
+  const old = document.querySelector('.todo-detail-modal');
+  if(old) old.remove();
+  const modal = document.createElement('div');
+  modal.className = 'todo-detail-modal';
+  modal.innerHTML = `<div class="todo-detail-modal-inner">
+    ${text.replace(/</g,"&lt;")}
+    <br><br>
+    <button onclick="this.closest('.todo-detail-modal').remove()">Schließen</button>
+  </div>`;
+  // Clickout
+  modal.onclick = function(e) { if(e.target === modal) modal.remove(); };
+  document.body.appendChild(modal);
+}
+function renderTodos(){
+  const todos = getTodos();
+  const wrap = document.getElementById('todos');
+  wrap.innerHTML = '';
+  if(!todos.length) wrap.innerHTML = `<div class="empty">Keine To-Dos 🎉</div>`;
+  todos.forEach((t,i) => {
+    const card = document.createElement('div');
+    card.className = "todo-card" + (t.done ? " done" : "");
+    card.innerHTML = `
+      <input type="checkbox" class="todo-check" ${t.done?'checked':''} id="tdc${i}">
+      <span class="todo-label" tabindex="0" title="${t.text.replace(/"/g,"&quot;")}">${truncateText(t.text, 30)}</span>
+      <button class="todo-close" title="Löschen" data-i="${i}">&times;</button>
+    `;
+    wrap.appendChild(card);
+    card.querySelector('.todo-check').onchange = function(){
+      const todos=getTodos();todos[i].done=!todos[i].done;saveTodos(todos);renderTodos();
+    }
+    card.querySelector('.todo-close').onclick = function(){
+      const todos = getTodos(); todos.splice(i,1); saveTodos(todos); renderTodos(); 
+    }
+    card.querySelector('.todo-label').onclick = () => showDetails(t.text);
+  });
+}
+document.getElementById('todoForm').onsubmit = function(e){
+  e.preventDefault();
+  const inp=document.getElementById('todoInput');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  const todos = getTodos();
+  todos.unshift({text:txt,done:false});
+  saveTodos(todos);
+  inp.value=""; inp.blur();
+  renderTodos();
+};
+renderTodos();
+
+// PWA: Service Worker Registrieren
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
