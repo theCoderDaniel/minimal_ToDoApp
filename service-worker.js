@@ -6,7 +6,6 @@ const urlsToCache = [
   './service-worker.js',
   './icon-192.png',
   './icon-512.png'
-  // Du kannst ggf. die Google Fonts auch hinzufügen oder per network holen lassen
 ];
 
 // Install
